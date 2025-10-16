@@ -1,10 +1,20 @@
 from flask import Flask, jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import requests
 from datetime import datetime
 
 app = Flask(__name__)
 
+# Initialize rate limiter
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["1000 per hour"]  # global limit
+)
+
 @app.route("/me", methods=["GET"])
+@limiter.limit("50 per minute")
 def get_me():
     # Fetch a random cat fact from catfact.ninja
     try:
